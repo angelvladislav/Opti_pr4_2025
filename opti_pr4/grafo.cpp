@@ -250,50 +250,52 @@
      }
  }
  
-void GRAFO::Sollin() {
-    vector<unsigned> Raiz(n);  // Inicialización de la raíz de cada nodo
-    vector<vector<unsigned>> N(n);  // Lista de nodos por componente conexa
-    unsigned AristasAdd = 0;  // Contador de aristas añadidas
-    int peso_total = 0;  // Peso total del árbol generador
+ void GRAFO::Sollin() {
 
-    // Inicialización de cada nodo como su propia raíz
+    // ----- Inicialización de estructuras -----
+    vector<unsigned> Raiz(n);
+    vector<vector<unsigned>> N(n);
+    unsigned AristasAdd = 0;
+    int peso_total = 0;
+
+    // ----- Inicializar cada nodo como su propio subárbol -----
     for (unsigned i = 0; i < n; i++) {
         Raiz[i] = i;
         N[i].push_back(i);
     }
 
-    unsigned iteracion = 1;  // Contador de iteraciones
+    unsigned iteracion = 1;
 
-    // Mientras no hayamos añadido n-1 aristas, seguimos
+    // ----- Bucle principal: iterar hasta tener n - 1 aristas -----
     while (AristasAdd < n - 1) {
         cout << "......................................................" << endl;
         cout << "\tIteracion " << iteracion << endl;
-        cout << "Los sub_arboles son : {" << endl;
+        cout << "Los sub_arboles son :" << endl;
 
-        // Mostrar los subárboles actuales
+        // ----- Mostrar los subárboles actuales -----
         for (unsigned i = 0; i < N.size(); i++) {
             if (!N[i].empty()) {
-                cout << "el sub_arbol " << i + 1 << " contiene los siguientes nodos :{";
+                cout << "el sub_arbol " << i + 1 << " tiene los nodos: ";
                 for (unsigned j = 0; j < N[i].size(); j++) {
                     cout << "(" << N[i][j] + 1 << ", " << i + 1 << " ) ";
                 }
-                cout << "}" << endl;
+                cout << endl;
             } else {
                 cout << "el sub_arbol " << i + 1 << " ahora está vacío" << endl;
             }
         }
-        cout << "}" << endl;
+        cout << endl;
 
-        unsigned nuevas_aristas = 0;  // Flag para saber si se añadió alguna arista en esta iteración
+        unsigned nuevas_aristas = 0;
 
-        // Para cada componente conexa no vacía
+        // ----- Buscar la arista mínima por componente -----
         for (unsigned k = 0; k < n; k++) {
             if (!N[k].empty()) {
-                int mink = maxint;  // Inicializamos el valor mínimo de peso con el valor máximo
-                unsigned ik = UERROR;  // Inicialización de los nodos de la arista mínima
+                int mink = maxint;
+                unsigned ik = UERROR;
                 unsigned jk = UERROR;
 
-                // Buscar la arista más ligera que conecta diferentes componentes
+                // ----- Recorrer todos los nodos de la componente k -----
                 for (unsigned p = 0; p < N[k].size(); p++) {
                     unsigned i = N[k][p];
                     for (unsigned l = 0; l < LS[i].size(); l++) {
@@ -307,14 +309,13 @@ void GRAFO::Sollin() {
                     }
                 }
 
-                // Si encontramos una arista válida
+                // ----- Si se encontró una arista válida, unir componentes -----
                 if (ik != UERROR && jk != UERROR) {
-                    cout << "Arista numero " << AristasAdd + 1 << " añadida: (" << ik + 1 << ",  " << jk + 1 << "), con peso " << mink << endl;
-                    peso_total += mink;  // Añadimos el peso de la arista
-                    AristasAdd++;  // Incrementamos el contador de aristas añadidas
-                    nuevas_aristas++;  // Indicamos que se añadió una nueva arista
+                    cout << "Arista " << AristasAdd + 1 << " con peso " << mink << " añadida: (" << ik + 1 << ",  " << jk + 1 << ")" << endl;
+                    peso_total += mink;
+                    AristasAdd++;
+                    nuevas_aristas++;
 
-                    // Union de los dos componentes
                     unsigned NewRaiz = Raiz[ik];
                     unsigned OldRaiz = Raiz[jk];
                     if (NewRaiz > OldRaiz) {
@@ -322,43 +323,43 @@ void GRAFO::Sollin() {
                         OldRaiz = Raiz[ik];
                     }
 
-                    // Actualizamos los nodos del subárbol
+                    // ----- Mover nodos de la vieja raíz a la nueva -----
                     for (unsigned i = 0; i < N[OldRaiz].size(); i++) {
                         unsigned nodo = N[OldRaiz][i];
                         Raiz[nodo] = NewRaiz;
                         N[NewRaiz].push_back(nodo);
                     }
-                    N[OldRaiz].clear();  // Vaciamos el subárbol eliminado
+                    N[OldRaiz].clear();
                 }
             }
         }
+        cout << "\n";
 
-        // Si no se añadieron nuevas aristas, el grafo no es conexo
+        // ----- Verificar si no se pudieron unir componentes -----
         if (nuevas_aristas == 0) {
             cout << "El grafo no es conexo" << endl;
             return;
         }
 
-        // Mostrar los subárboles después de añadir las aristas en esta iteración
-        cout << "Los sub_arboles son : {" << endl;
+        // ----- Mostrar subárboles después de la iteración -----
+        cout << "Los sub_arboles son :" << endl;
         for (unsigned i = 0; i < N.size(); i++) {
             if (!N[i].empty()) {
-                cout << "el sub_arbol " << i + 1 << " contiene los siguientes nodos :{";
+                cout << "el sub_arbol " << i + 1 << " tiene: ";
                 for (unsigned j = 0; j < N[i].size(); j++) {
                     cout << "(" << N[i][j] + 1 << ", " << i + 1 << " ) ";
                 }
-                cout << "}" << endl;
+                cout << endl;
             } else {
                 cout << "el sub_arbol " << i + 1 << " ahora está vacío" << endl;
             }
         }
-        cout << "}" << endl;
+        cout << endl;
 
-        iteracion++;  // Incrementamos el contador de iteraciones
+        iteracion++;
     }
 
-    // Mostrar el peso total del árbol generador
+    // ----- Mostrar resultado final -----
     cout << "El peso/coste del árbol es: " << peso_total << endl;
     cout << "......................................................" << endl;
 }
-
